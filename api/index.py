@@ -5,10 +5,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from groq import Groq
 
 # Initialize Flask app
 app = Flask(__name__)
+CORS(app)  # Enable CORS
 
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
@@ -67,13 +69,14 @@ def generate_insights_and_tests(data_summary):
 @app.route('/api/analyze', methods=['POST','GET'])
 def analyze_data():
     try:
+        print("doneee : ", request)
         # Get the uploaded file (CSV format)
-        file = request.files['file']
-        if not file or not file.filename.endswith('.csv'):
-            return jsonify({"error": "Invalid file format. Please upload a CSV file."}), 400
+        # file = request.files['file']
+        # if not file or not file.filename.endswith('.csv'):
+        #     return jsonify({"error": "Invalid file format. Please upload a CSV file."}), 400
 
         # Read the CSV data
-        data = pd.read_csv('server/Air_Traffic_Landings_Statistics.csv')
+        data = pd.read_csv('api/Air_Traffic_Landings_Statistics.csv')
 
         # Preprocess the data: Handle missing values, encoding, and scaling
         data = preprocess_data(data)
@@ -99,6 +102,7 @@ def analyze_data():
             'generated_plots': plots
         })
     except Exception as e:
+        print("error : ", e)
         return jsonify({"error": str(e)}), 500
 
 # Function to preprocess the data (handle missing values, encode categorical features, etc.)

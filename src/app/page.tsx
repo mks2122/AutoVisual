@@ -6,6 +6,7 @@ import { Input } from 'src/app/components/ui/input';
 import { Label } from 'src/app/components/ui/label';
 import { Textarea } from 'src/app/components/ui/textarea';
 import { Upload } from 'lucide-react';
+import { log } from 'node:console';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -24,14 +25,16 @@ export default function Home() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/analyze', {
+      const response = await fetch('http://127.0.0.1:5000//api/analyze', {
         method: 'POST',
         body: formData,
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('File uploaded successfully:', result);
+      if (response) {
+        console.log('File uploaded successfully:', response);
+        // const result = await response.json();
+        // console.log('File uploaded successfully:', result);
+        console.log('File uploaded successfully:', response);
         alert('File uploaded successfully!');
       } else {
         alert('Failed to upload the file.');
