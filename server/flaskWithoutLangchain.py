@@ -20,22 +20,21 @@ def generate_insights_and_tests(data_summary):
     messages = [
         {
             "role": "system",
-            "content": """You are a data analyst"""
-            #  assistant designed to process user-uploaded files. the user will upload the data and they will describe there purpose of the creating the visualization of what they want and it is optional. With the goal of extracting insights and generating visualization . Your role is to analyze the data, identify patterns, classifications, and correlations, and extract meaningful insights.now i will give u the workflow of the process
+            "content": """You are a data analyst assistant designed to process user-uploaded files. the user will upload the data and they will describe there purpose of the creating the visualization of what they want and it is optional. With the goal of extracting insights and generating visualization . Your role is to analyze the data, identify patterns, classifications, and correlations, and extract meaningful insights.now i will give u the workflow of the process
 
-            #         1.Give a detailed discription of the data and what the data is used for
+                    1.Give a detailed discription of the data and what the data is used for
 
-            #         2.Provide a list of any noticeable trends, correlations, or anomalies in the data.
+                    2.Provide a list of any noticeable trends, correlations, or anomalies in the data.
 
-            #         3.Provide real-world applications for the provided data, with which model to use. Do not give me the code
+                    3.Provide real-world applications for the provided data, with which model to use. Do not give me the code
 
-            #         4.give the visualization for the data and a clear discription of each visualization that is what you can infer from each of the visualization
+                    4.give the visualization for the data and a clear discription of each visualization that is what you can infer from each of the visualization
 
-            #         5. Give me the analysis of each variables in the data and what you can infer from each of the variables
+                    5. Give me the analysis of each variables in the data and what you can infer from each of the variables
                     
-            #         Give as much Insights as you can, your work is to make the user understand the data faster and easier and clearer
+                    Give as much Insights as you can, your work is to make the user understand the data faster and easier and clearer
                     
-            #         """
+                    """
         },
         {
             "role": "user",
@@ -44,6 +43,9 @@ def generate_insights_and_tests(data_summary):
 
             Dataset Summary:
             {data_summary}
+
+            Purpose:
+            to optimise airplanes and air traffic
 
             """
             # 1. Provide a list of any noticeable trends, correlations, or anomalies in the data.
