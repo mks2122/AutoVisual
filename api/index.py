@@ -49,7 +49,7 @@ def generate_insights_and_tests(data_summary):
             {data_summary}
 
             Purpose:
-            to optimise airplanes and air traffic
+            {purpose}
 
             1. Provide a list of any noticeable trends, correlations, or anomalies in the data.
             2. Generate unit tests or validation checks to ensure that the data is valid (e.g., no negative values, correct range, no missing data).
@@ -60,38 +60,59 @@ def generate_insights_and_tests(data_summary):
 
     chat_completion = client.chat.completions.create(
         messages=messages,
-        model="llama3-70b-8192",
+        model="llama-3.1-70b-versatile",
     )
     print(chat_completion.choices)
     return chat_completion.choices[0].message.content if chat_completion.choices else "No response generated"
     return messages[1]["content"]
+
+
+def process_summary(summary):
+    processed_summary = {}
+    for key, value_dict in summary.items():
+        processed_summary[key] = {
+            k: int(v)
+            for k, v in value_dict.items()
+            if pd.api.types.is_number(v) and not pd.isna(v)
+        }
+    return processed_summary
+
 # Route to analyze data
 @app.route('/api/analyze', methods=['POST','GET'])
 def analyze_data():
+    
     try:
-        print("doneee : ", request)
         # Get the uploaded file (CSV format)
-        # file = request.files['file']
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+
+        # Get the 'purpose' field from the form
+        purpose = request.form.get('purpose')
+
+        if not purpose:
+            return jsonify({"error": "Purpose is required"}), 400
+        print("doneee : ", file,purpose)
         # if not file or not file.filename.endswith('.csv'):
         #     return jsonify({"error": "Invalid file format. Please upload a CSV file."}), 400
 
         # Read the CSV data
-        data = pd.read_csv('api/Air_Traffic_Landings_Statistics.csv')
+        data = pd.read_csv(file)
 
         # Preprocess the data: Handle missing values, encoding, and scaling
         data = preprocess_data(data)
 
         # Generate basic summary statistics for the data
-        summary = data.describe(include='all').to_dict()
+        summary = process_summary(data.describe(include='all').to_dict())
 
         # Convert the summary to a human-readable format for the prompt
-        data_summary = "\n".join([f"{key}: {value}" for key, value in summary.items()])
+        # data_summary = "\n".join([f"{key}: {value}" for key, value in summary.items()])
 
         # Get insights, tests, and plot suggestions from the Groq API
-        # insights_and_tests = generate_insights_and_tests(data_summary)
-        print("doneee")
+        insights_and_tests = generate_insights_and_tests(data_summary)
+        # print("doneee")
 
-        insights_and_tests="ahdfasd"
+        # insights_and_tests="ahdfasd"
 
         # Generate plots based on the data
         plots = generate_plots(data)

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { Bar, Line, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -15,8 +17,10 @@ import {
   Legend,
 } from "chart.js";
 import { Card, CardContent, CardHeader, CardTitle } from "src/app/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "src/app/components/ui/select";
-import { Input } from "src/app/components/ui/input";
+import VisualizationAndInsights from "src/app/components/VisualizationAndInsights";
+
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "src/app/components/ui/select";
+// import { Input } from "src/app/components/ui/input";
 
 // Register Chart.js components
 ChartJS.register(
@@ -63,21 +67,25 @@ const chartOptions = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const state = router.state || {response:"asjdfhalksjdfhlakjsdf\n fghjk"}; // Safely access state
+  const {response} = state;;
   const [chartType, setChartType] = useState("bar");
   const [data, setData] = useState(initialData);
 
   const generateInsights = () => {
-    const insights = [];
-    data.datasets.forEach((dataset) => {
-      const maxValue = Math.max(...dataset.data);
-      const minValue = Math.min(...dataset.data);
-      const maxIndex = dataset.data.indexOf(maxValue);
-      const minIndex = dataset.data.indexOf(minValue);
+    // const insights = [];
 
-      insights.push(`For ${dataset.label}, the highest value is ${maxValue} in ${data.labels[maxIndex]}.`);
-      insights.push(`For ${dataset.label}, the lowest value is ${minValue} in ${data.labels[minIndex]}.`);
-    });
-    return insights;
+    // data.datasets.forEach((dataset) => {
+    //   const maxValue = Math.max(...dataset.data);
+    //   const minValue = Math.min(...dataset.data);
+    //   const maxIndex = dataset.data.indexOf(maxValue);
+    //   const minIndex = dataset.data.indexOf(minValue);
+
+    //   insights.push(`For ${dataset.label}, the highest value is ${maxValue} in ${data.labels[maxIndex]}.`);
+    //   insights.push(`For ${dataset.label}, the lowest value is ${minValue} in ${data.labels[minIndex]}.`);
+    // });
+    return response;
   };
 
   const handleFileUpload = (e) => {
@@ -114,107 +122,73 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-10 space-y-10">
+      {/* Header */}
       <h1 className="text-3xl font-bold mb-8 text-center">Dynamic AI-Powered Dashboard</h1>
-      <div className="grid gap-8 md:grid-cols-2">
-        {/* Chart Selector and Visualization */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Data Visualization</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <Select
-                onValueChange={(value) => setChartType(value)}
-                value={chartType} // Ensures the selected value is displayed
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select chart type">{chartType}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bar">Bar Chart</SelectItem>
-                  <SelectItem value="line">Line Chart</SelectItem>
-                  <SelectItem value="pie">Pie Chart</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {renderChart()}
-          </CardContent>
-        </Card>
-
-        {/* Insights Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>AI Insights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-5 space-y-2 text-gray-800">
-              {generateInsights().map((insight, index) => (
-                <li key={index} className="text-sm font-medium">{insight}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+  
+      {/* Overview Section */}
+      <div className="space-y-8">
+        <h2 className="text-xl font-semibold text-center">Overview</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Data Description */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Data Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-700">
+                The dataset includes labels representing months and numerical datasets corresponding to two categories. These values can represent sales, performance metrics, or any other measurable feature.
+              </p>
+            </CardContent>
+          </Card>
+  
+          {/* Feature Analysis */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Feature Analysis</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc pl-5 space-y-2 text-gray-800">
+                {data.datasets.map((dataset, index) => (
+                  <li key={index} className="text-sm font-medium">
+                    {dataset.label} shows variations across months with an average value of {(
+                      dataset.data.reduce((a, b) => a + b, 0) / dataset.data.length
+                    ).toFixed(2)}.
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+  
+          {/* Real-World Applications */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Real-World Applications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-700">
+                This visualization tool can be applied in business analytics to track sales trends, in education to analyze student performance over time, or in healthcare to monitor patient metrics across months.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <div className="grid gap-8 md:grid-cols-3 mt-8">
-        {/* Data Description Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Data Description</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-700">
-              The dataset includes labels representing months and numerical datasets corresponding to two categories. These values can represent sales, performance metrics, or any other measurable feature.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Feature Analysis Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Feature Analysis</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-5 space-y-2 text-gray-800">
-              {data.datasets.map((dataset, index) => (
-                <li key={index} className="text-sm font-medium">
-                  {dataset.label} shows variations across months with an average value of {(
-                    dataset.data.reduce((a, b) => a + b, 0) / dataset.data.length
-                  ).toFixed(2)}.
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* Real-World Applications Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Real-World Applications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-700">
-              This visualization tool can be applied in business analytics to track sales trends, in education to analyze student performance over time, or in healthcare to monitor patient metrics across months.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Data Upload Section */}
-      <div className="mt-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Data</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Input type="file" onChange={handleFileUpload} />
-            <p className="text-sm text-gray-500 mt-2">
-              Upload a JSON file with <code>"labels"</code> and <code>"datasets"</code>.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+  
+      
+      <h2 className="text-xl font-semibold text-center">Visualization</h2>
+      <div className="container mx-auto py-10">
+      <VisualizationAndInsights renderChart={renderChart} response={response} />
+    </div>
+      <div className="container mx-auto py-10">
+      <VisualizationAndInsights renderChart={renderChart} response="09865" />
+    </div>
+      <div className="container mx-auto py-10">
+      <VisualizationAndInsights renderChart={renderChart} response="23456789" />
+    </div>
+      <div className="container mx-auto py-10">
+      <VisualizationAndInsights renderChart={renderChart} response="{response}" />
+    </div>
     </div>
   );
+  
 }
