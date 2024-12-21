@@ -2,49 +2,63 @@ import os
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
-
 import seaborn as sns
 from flask import Flask, request, jsonify
-from transformers import pipeline, AutoTokenizer
+from groq import Groq
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Load Hugging Face model and tokenizer
-llm = pipeline("text-generation", model="distilgpt2")
-tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
-tokenizer.pad_token = tokenizer.eos_token
+# Initialize Groq client
+client = Groq(
+    api_key="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",
+)
 
-# Function to count tokens in the input
-def count_tokens(text):
-    tokens = tokenizer(text, return_tensors="pt", truncation=False).input_ids
-    return tokens.shape[-1]
-
-
-# Function to generate insights and tests using the LLM
+# Function to generate insights and tests using the Groq API
 def generate_insights_and_tests(data_summary):
-    prompt = f"""
-    You are a data analyst.
+    messages = [
+        {
+            "role": "system",
+            "content": """You are a data analyst"""
+            #  assistant designed to process user-uploaded files. the user will upload the data and they will describe there purpose of the creating the visualization of what they want and it is optional. With the goal of extracting insights and generating visualization . Your role is to analyze the data, identify patterns, classifications, and correlations, and extract meaningful insights.now i will give u the workflow of the process
 
-    Dataset Summary:
-    {data_summary[:1000]}...
+            #         1.Give a detailed discription of the data and what the data is used for
 
-    1. Provide a list of any noticeable trends, correlations, or anomalies in the data.
-    2. Generate unit tests or validation checks to ensure that the data is valid (e.g., no negative values, correct range, no missing data).
-    3. Suggest appropriate visualizations based on the data features.
-    """
+            #         2.Provide a list of any noticeable trends, correlations, or anomalies in the data.
 
+            #         3.Provide real-world applications for the provided data, with which model to use. Do not give me the code
 
+            #         4.give the visualization for the data and a clear discription of each visualization that is what you can infer from each of the visualization
 
-    token_count = count_tokens(prompt)
-    print(f"Token count for the prompt: {token_count}")
-    
-    # Generate response
-    response = llm(prompt, max_new_tokens=150, num_return_sequences=1)
-    return response if response else "No response generated"
+            #         5. Give me the analysis of each variables in the data and what you can infer from each of the variables
+                    
+            #         Give as much Insights as you can, your work is to make the user understand the data faster and easier and clearer
+                    
+            #         """
+        },
+        {
+            "role": "user",
+            "content": f"""
+            Given the following dataset summary, provide insights of the data.
 
+            Dataset Summary:
+            {data_summary}
+
+            """
+            # 1. Provide a list of any noticeable trends, correlations, or anomalies in the data.
+            # 2. Generate unit tests or validation checks to ensure that the data is valid (e.g., no negative values, correct range, no missing data).
+            # 3. Suggest appropriate visualizations based on the data features.
+        }
+    ]
+
+    chat_completion = client.chat.completions.create(
+        messages=messages,
+        model="llama3-70b-8192",
+    )
+    print(chat_completion.choices)
+    return chat_completion.choices[0].message.content if chat_completion.choices else "No response generated"
+    return messages[1]["content"]
 # Route to analyze data
 @app.route('/analyze', methods=['POST','GET'])
 def analyze_data():
@@ -53,36 +67,36 @@ def analyze_data():
         # file = request.files['file']
         # if not file or not file.filename.endswith('.csv'):
         #     return jsonify({"error": "Invalid file format. Please upload a CSV file."}), 400
-        
+
         # Read the CSV data
         data = pd.read_csv('Air_Traffic_Landings_Statistics.csv')
-        
+
         # Preprocess the data: Handle missing values, encoding, and scaling
         data = preprocess_data(data)
-        
+
         # Generate basic summary statistics for the data
         summary = data.describe(include='all').to_dict()
-        
+
         # Convert the summary to a human-readable format for the prompt
         data_summary = "\n".join([f"{key}: {value}" for key, value in summary.items()])
-        
-        # Get insights, tests, and plot suggestions from the LLM
+
+        # Get insights, tests, and plot suggestions from the Groq API
         insights_and_tests = generate_insights_and_tests(data_summary)
-        
+
         # Generate plots based on the data
         plots = generate_plots(data)
-        
-        return {
+
+        return jsonify({
             'summary': summary,
             'insights_and_tests': insights_and_tests,
             'generated_plots': plots
-        }
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # Function to preprocess the data (handle missing values, encode categorical features, etc.)
 def preprocess_data(data):
-    # Handle missing values
+    # Handle missing values by filling with the mean or mode based on column type
     for column in data.columns:
         if data[column].dtype == 'object':  # Categorical columns
             data[column] = data[column].fillna(data[column].mode()[0] if not data[column].mode().empty else '')
@@ -97,7 +111,6 @@ def preprocess_data(data):
         data[numerical_cols] = (data[numerical_cols] - data[numerical_cols].mean()) / data[numerical_cols].std()
 
     return data
-
 
 # Function to generate plots based on the data
 def generate_plots(data):
@@ -130,6 +143,3 @@ def generate_plots(data):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    # with app.app_context():
-    #     # Call analyze_data directly (for testing without running the server)
-    #     print(analyze_data())
