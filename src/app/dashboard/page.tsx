@@ -14,9 +14,9 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from 'src/app/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/app/components/ui/select'
+import { Input } from 'src/app/components/ui/input'
 
 // Register Chart.js components
 ChartJS.register(
