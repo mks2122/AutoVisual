@@ -1,17 +1,49 @@
-import os
-import openai
+from langchain_community.llms import HuggingFacePipeline
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from huggingface_hub import login
 
-client = openai.OpenAI(
-    api_key="1f1abf74-1689-4422-bbd8-2aa4f05bd43b",
-    base_url="https://api.sambanova.ai/v1",
+login("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")
+
+# Load Qwen2.5-Coder-3B-Instruct model
+llama_model = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen2.5-Coder-3B-Instruct", device_map="auto", max_memory={0: "3GB", "cpu": "30GB"}
+)
+llama_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-Coder-3B-Instruct")
+llama_pipeline = pipeline("text-generation", model=llama_model, tokenizer=llama_tokenizer, max_new_tokens=200)
+
+# Load Starcoder2-3b model
+starcoder_model = AutoModelForCausalLM.from_pretrained(
+    "bigcode/starcoderbase", device_map="auto", max_memory={0: "3GB", "cpu": "30GB"}
+)
+starcoder_tokenizer = AutoTokenizer.from_pretrained("bigcode/starcoderbase")
+starcoder_pipeline = pipeline("text-generation", model=starcoder_model, tokenizer=starcoder_tokenizer, max_new_tokens=200)
+
+# Wrap with HuggingFacePipeline
+inference_llm = HuggingFacePipeline(pipeline=llama_pipeline)
+code_generation_llm = HuggingFacePipeline(pipeline=starcoder_pipeline)
+
+# Prompts
+inference_prompt = PromptTemplate(
+    input_variables=["data"],
+    template="Perform basic data analysis on the following data:\n{data}\nProvide insights and trends."
+)
+code_generation_prompt = PromptTemplate(
+    input_variables=["request"],
+    template="Write Python code to perform the following task:\n{request}\nEnsure the code is optimized and includes comments."
 )
 
-response = client.chat.completions.create(
-    model='Meta-Llama-3.1-8B-Instruct',
-    # messages=[{"role":"system","content":"You are a data Scientist Instructor, You will instruct how to infer from a given data with its features given, you will be given the results so you will have to tell what you can infer"},{"role":"user","content":"Give me initial instructions on how to infer from a given data"}],
-    messages=[{"role":"system","content":"You are a inference model who will help a data Scientist, You will instruct step by step how to infer from a given data, You will not write any code, you will just instruct and infer from the results, you will be given the results of the each step so you will have to tell what you can infer"},{"role":"user","content":"Give me initial instructions on how to infer from a given data"}],
-    temperature =  0.1,
-    top_p = 0.1
-)
+# Define Chains
+inference_chain = LLMChain(llm=inference_llm, prompt=inference_prompt)
+code_generation_chain = LLMChain(llm=code_generation_llm, prompt=code_generation_prompt)
 
-print(response.choices[0].message.content)
+# Test Inference Chain
+test_data = "Sample data: [10, 20, 30, 40, 50]. Identify trends and provide insights."
+inference_result = inference_chain.run(data=test_data)
+print("Inference Result:\n", inference_result)
+
+# Test Code Generation Chain
+test_request = "Generate a function to calculate the mean of a list of numbers."
+code_result = code_generation_chain.run(request=test_request)
+print("Generated Code:\n", code_result)
