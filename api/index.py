@@ -10,6 +10,8 @@ from groq import Groq
 # Initialize Flask app
 app = Flask(__name__)
 
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
 # Initialize Groq client
 client = Groq(
     api_key="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",
@@ -47,10 +49,10 @@ def generate_insights_and_tests(data_summary):
             Purpose:
             to optimise airplanes and air traffic
 
+            1. Provide a list of any noticeable trends, correlations, or anomalies in the data.
+            2. Generate unit tests or validation checks to ensure that the data is valid (e.g., no negative values, correct range, no missing data).
+            3. Suggest appropriate visualizations based on the data features.
             """
-            # 1. Provide a list of any noticeable trends, correlations, or anomalies in the data.
-            # 2. Generate unit tests or validation checks to ensure that the data is valid (e.g., no negative values, correct range, no missing data).
-            # 3. Suggest appropriate visualizations based on the data features.
         }
     ]
 
@@ -62,16 +64,16 @@ def generate_insights_and_tests(data_summary):
     return chat_completion.choices[0].message.content if chat_completion.choices else "No response generated"
     return messages[1]["content"]
 # Route to analyze data
-@app.route('/analyze', methods=['POST','GET'])
+@app.route('/api/analyze', methods=['POST','GET'])
 def analyze_data():
     try:
         # Get the uploaded file (CSV format)
-        # file = request.files['file']
-        # if not file or not file.filename.endswith('.csv'):
-        #     return jsonify({"error": "Invalid file format. Please upload a CSV file."}), 400
+        file = request.files['file']
+        if not file or not file.filename.endswith('.csv'):
+            return jsonify({"error": "Invalid file format. Please upload a CSV file."}), 400
 
         # Read the CSV data
-        data = pd.read_csv('Air_Traffic_Landings_Statistics.csv')
+        data = pd.read_csv('server/Air_Traffic_Landings_Statistics.csv')
 
         # Preprocess the data: Handle missing values, encoding, and scaling
         data = preprocess_data(data)
@@ -83,7 +85,10 @@ def analyze_data():
         data_summary = "\n".join([f"{key}: {value}" for key, value in summary.items()])
 
         # Get insights, tests, and plot suggestions from the Groq API
-        insights_and_tests = generate_insights_and_tests(data_summary)
+        # insights_and_tests = generate_insights_and_tests(data_summary)
+        print("doneee")
+
+        insights_and_tests="ahdfasd"
 
         # Generate plots based on the data
         plots = generate_plots(data)
