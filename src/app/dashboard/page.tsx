@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import ReactMarkdown from "react-markdown"; // For rendering markdown
 import { Bar, Line, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -18,9 +18,6 @@ import {
 } from "chart.js";
 import { Card, CardContent, CardHeader, CardTitle } from "src/app/components/ui/card";
 import VisualizationAndInsights from "src/app/components/VisualizationAndInsights";
-
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "src/app/components/ui/select";
-// import { Input } from "src/app/components/ui/input";
 
 // Register Chart.js components
 ChartJS.register(
@@ -68,25 +65,19 @@ const chartOptions = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const state = router.state || {response:"asjdfhalksjdfhlakjsdf\n fghjk"}; // Safely access state
-  const {response} = state;;
+  const [response, setResponse] = useState<string | null>(null);
   const [chartType, setChartType] = useState("bar");
   const [data, setData] = useState(initialData);
 
-  const generateInsights = () => {
-    // const insights = [];
-
-    // data.datasets.forEach((dataset) => {
-    //   const maxValue = Math.max(...dataset.data);
-    //   const minValue = Math.min(...dataset.data);
-    //   const maxIndex = dataset.data.indexOf(maxValue);
-    //   const minIndex = dataset.data.indexOf(minValue);
-
-    //   insights.push(`For ${dataset.label}, the highest value is ${maxValue} in ${data.labels[maxIndex]}.`);
-    //   insights.push(`For ${dataset.label}, the lowest value is ${minValue} in ${data.labels[minIndex]}.`);
-    // });
-    return response;
-  };
+  useEffect(() => {
+    // Retrieve the response from localStorage
+    const storedResponse = localStorage.getItem('response');
+    if (storedResponse === 'null') {
+      setResponse(null);
+    } else {
+      setResponse(storedResponse ? JSON.parse(storedResponse) : null);
+    }
+  }, []);
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
@@ -125,70 +116,43 @@ export default function DashboardPage() {
     <div className="container mx-auto py-10 space-y-10">
       {/* Header */}
       <h1 className="text-3xl font-bold mb-8 text-center">Dynamic AI-Powered Dashboard</h1>
-  
-      {/* Overview Section */}
-      <div className="space-y-8">
+
+      {/* <div className="space-y-8">
         <h2 className="text-xl font-semibold text-center">Overview</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Data Description */}
+        <div className="">
+          {/* Data Description 
           <Card>
             <CardHeader>
               <CardTitle>Data Description</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-700">
-                The dataset includes labels representing months and numerical datasets corresponding to two categories. These values can represent sales, performance metrics, or any other measurable feature.
-              </p>
-            </CardContent>
-          </Card>
-  
-          {/* Feature Analysis */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Feature Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="list-disc pl-5 space-y-2 text-gray-800">
-                {data.datasets.map((dataset, index) => (
-                  <li key={index} className="text-sm font-medium">
-                    {dataset.label} shows variations across months with an average value of {(
-                      dataset.data.reduce((a, b) => a + b, 0) / dataset.data.length
-                    ).toFixed(2)}.
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-  
-          {/* Real-World Applications */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Real-World Applications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-700">
-                This visualization tool can be applied in business analytics to track sales trends, in education to analyze student performance over time, or in healthcare to monitor patient metrics across months.
+                {response ? response.insights_and_tests : null}
               </p>
             </CardContent>
           </Card>
         </div>
+      </div> */}
+
+      {/* Render Insights and Tests as Markdown */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-center">Insights and Tests</h2>
+        <div className="mt-4 p-4 border rounded-md">
+          <div className="mt-2">
+            {/* Render the 'insights_and_tests' as markdown */}
+            {response && response.insights_and_tests && (
+              <ReactMarkdown>{response ? response.insights_and_tests : null}</ReactMarkdown>
+            )}
+          </div>
+        </div>
       </div>
-  
-      
+
       <h2 className="text-xl font-semibold text-center">Visualization</h2>
       <div className="container mx-auto py-10">
-      <VisualizationAndInsights renderChart={renderChart} response={response} />
-    </div>
-      <div className="container mx-auto py-10">
-      <VisualizationAndInsights renderChart={renderChart} response="09865" />
-    </div>
-      <div className="container mx-auto py-10">
-      <VisualizationAndInsights renderChart={renderChart} response="23456789" />
-    </div>
-      <div className="container mx-auto py-10">
-      <VisualizationAndInsights renderChart={renderChart} response="{response}" />
-    </div>
+        {response && response.generated_plots && (
+          <VisualizationAndInsights plots={response.generated_plots} response={"sdfsd"} />
+        )}
+      </div>
     </div>
   );
-  
 }

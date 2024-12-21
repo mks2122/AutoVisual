@@ -7,6 +7,7 @@ import seaborn as sns
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from groq import Groq
+import re
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -20,24 +21,22 @@ client = Groq(
 )
 
 # Function to generate insights and tests using the Groq API
-def generate_insights_and_tests(data_summary):
+def generate_insights_and_tests(data_summary,purpose):
+    # return 'done'
     messages = [
         {
             "role": "system",
             "content": """You are a data analyst assistant designed to process user-uploaded files. the user will upload the data and they will describe there purpose of the creating the visualization of what they want and it is optional. With the goal of extracting insights and generating visualization . Your role is to analyze the data, identify patterns, classifications, and correlations, and extract meaningful insights.now i will give u the workflow of the process
 
-                    1.Give a detailed discription of the data and what the data is used for
+                    1.Give a detailed discription of the data and what the data is used for and Provide a list of any noticeable trends, correlations, or anomalies in the data.
 
-                    2.Provide a list of any noticeable trends, correlations, or anomalies in the data.
+                    2.Provide real-world applications for the provided data, with which model to use. Do not give me the code
 
-                    3.Provide real-world applications for the provided data, with which model to use. Do not give me the code
-
-                    4.give the visualization for the data and a clear discription of each visualization that is what you can infer from each of the visualization
-
-                    5. Give me the analysis of each variables in the data and what you can infer from each of the variables
+                    3. Give me the analysis of each variables in the data and what you can infer from each of the variables
                     
-                    Give as much Insights as you can, your work is to make the user understand the data faster and easier and clearer
+                    Give as much Insights as you can, your work is to make the user understand the data faster and easier and clearer. Make sure to add necessary new lines characters to neatly present the data and the insights in a clear and concise manner.
                     
+                    Add '\n\n'  after each topic to separate the paragraphs.
                     """
         },
         {
@@ -62,9 +61,32 @@ def generate_insights_and_tests(data_summary):
         messages=messages,
         model="llama-3.1-70b-versatile",
     )
-    print(chat_completion.choices)
-    return chat_completion.choices[0].message.content if chat_completion.choices else "No response generated"
-    return messages[1]["content"]
+    
+    # pattern = r"@#!#@(.*?)@#!#@"
+
+    # # Find all matches and split based on headings
+    # headings = re.findall(pattern, chat_completion.choices[0].message.content)
+    # sections = re.split(pattern, chat_completion.choices[0].message.content)[1:]  # Skip the first empty split
+
+    # # Remove any empty strings that result from the split and pair each heading with its corresponding section
+    # split_text = [{"heading": headings[i], "content": sections[i].strip()} for i in range(len(headings))]
+
+    # text = chat_completion.choices[0].message.content
+    # pattern = r"@#!#@(.*?)@#!#@"
+
+    # # Extract headings and content
+    # matches = re.findall(pattern, text, re.DOTALL)
+
+    # # Clean and structure the content into an array
+    # split_text = [{"heading": section.split("\n", 1)[0].strip(), "content": section.split("\n", 1)[1].strip() if len(section.split("\n", 1)) > 1 else ""} for section in matches]
+
+    # # Display the result
+    # print(split_text)
+    # # print(chat_completion.choices)
+    # return split_text
+    # print(chat_completion.choices[0].message.content)
+    return chat_completion.choices[0].message.content
+
 
 
 def process_summary(summary):
@@ -103,13 +125,13 @@ def analyze_data():
         data = preprocess_data(data)
 
         # Generate basic summary statistics for the data
-        summary = process_summary(data.describe(include='all').to_dict())
+        summary = data.describe(include='all').to_dict()
 
         # Convert the summary to a human-readable format for the prompt
-        # data_summary = "\n".join([f"{key}: {value}" for key, value in summary.items()])
+        data_summary = process_summary(summary)
 
         # Get insights, tests, and plot suggestions from the Groq API
-        insights_and_tests = generate_insights_and_tests(data_summary)
+        insights_and_tests = generate_insights_and_tests(summary,purpose)
         # print("doneee")
 
         # insights_and_tests="ahdfasd"
@@ -118,7 +140,7 @@ def analyze_data():
         plots = generate_plots(data)
 
         return jsonify({
-            'summary': summary,
+            'summary': data_summary,
             'insights_and_tests': insights_and_tests,
             'generated_plots': plots
         })
@@ -147,7 +169,7 @@ def preprocess_data(data):
 # Function to generate plots based on the data
 def generate_plots(data):
     plots = []
-    os.makedirs('static', exist_ok=True)  # Ensure the static directory exists
+    os.makedirs('public/static', exist_ok=True)  # Ensure the static directory exists
 
     # Filter only valid numerical columns
     numeric_data = data.select_dtypes(include=['float64', 'int64'])
@@ -155,10 +177,10 @@ def generate_plots(data):
         plt.figure(figsize=(6, 4))
         sns.histplot(numeric_data[column], kde=True)
         plt.title(f"Distribution of {column}")
-        plot_path = f"static/{column}_histogram.png"
+        plot_path = f"public/static/{column}_histogram.png"
         plt.savefig(plot_path)
         plt.close()
-        plots.append(f"/{plot_path}")
+        plots.append(f"/static/{column}_histogram.png")
 
     # Generate a correlation heatmap if there are multiple numerical columns
     if len(numeric_data.columns) > 1:
@@ -166,10 +188,10 @@ def generate_plots(data):
         correlation_matrix = numeric_data.corr()
         sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
         plt.title("Correlation Heatmap")
-        plot_path = "static/correlation_heatmap.png"
+        plot_path = "public/static/correlation_heatmap.png"
         plt.savefig(plot_path)
         plt.close()
-        plots.append(f"/{plot_path}")
+        plots.append(f"/static/correlation_heatmap.png")
 
     return plots
 

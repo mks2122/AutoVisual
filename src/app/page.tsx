@@ -43,8 +43,9 @@ export default function Home() {
         alert("File uploaded successfully!");
 
         // Redirect to the dashboard
-        router.push(
-          "/dashboard", {state: {response: result}});
+
+        localStorage.setItem('response', JSON.stringify(result));
+        router.push('/dashboard');
       } else {
         alert("Failed to upload the file.");
       }
