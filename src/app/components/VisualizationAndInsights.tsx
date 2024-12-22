@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import ReactMarkdown from "react-markdown";
 
 const VisualizationAndInsights = ({ plots, response }) => {
   return (
@@ -14,7 +15,7 @@ const VisualizationAndInsights = ({ plots, response }) => {
             </CardHeader>
             <CardContent>
         <div key={index} className="border rounded-md p-4">
-          <img src={plot} alt={`Plot ${index + 1}`} className="w-full h-auto object-cover" />
+          <img src={plot[0]} alt={`Plot ${index + 1}`} className="w-full h-auto object-cover" />
         </div>
             </CardContent>
           </Card>
@@ -29,7 +30,9 @@ const VisualizationAndInsights = ({ plots, response }) => {
                 {/* {generateInsights().map((insight, index) => (
                   <li key={index} className="text-sm font-medium">{insight}</li>
                   ))} */}
-                "dfghjkl;"
+                
+<ReactMarkdown>{plot[1]}</ReactMarkdown>
+                
               </ul>
             </CardContent>
           </Card>

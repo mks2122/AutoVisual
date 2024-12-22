@@ -1,9 +1,10 @@
 from groq import Groq
+import base64
 
 # Initialize the client
 client = Groq(
     # This is the default and can be omitted
-    api_key="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",
+    api_key="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",
 )
 
 
@@ -13,18 +14,21 @@ image_path = "E:\personalProjects\AutoVisual\public\static\Black Bet Win_histogr
 # Open the image in binary mode
 with open(image_path, "rb") as image_file:
     # Read the image data
-    image_data = image_file.read()
+    image_data =  base64.b64encode(image_file.read()).decode("utf-8")
 
 # Prepare the messages
 messages = [
     {
-        "role": "system",
-        "content": "You are an assistant that analyzes plots in images and provides insights."
-    },
-    {
         "role": "user",
-        "content": "Analyze this plot and provide a summary of its key features.",
-        "image": image_data  # Assuming the API accepts raw image data directly in the messages field
+        "content": [
+            {"type": "text", "text": "What's in this image?"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_data}",
+                },
+            },
+        ],
     }
 ]
 
@@ -40,4 +44,4 @@ completion = client.chat.completions.create(
 )
 
 # Print the response
-print(completion.choices[0].message["content"])
+print(completion.choices[0].message.content)

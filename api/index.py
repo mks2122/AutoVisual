@@ -8,6 +8,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from groq import Groq
 import re
+import base64
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -166,6 +167,42 @@ def preprocess_data(data):
 
     return data
 
+def img_inference(image_path):
+    with open(image_path, "rb") as image_file:
+        image_data =  base64.b64encode(image_file.read()).decode("utf-8")
+
+    # Prepare the messages
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "What's in this image?"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image_data}",
+                    },
+                },
+            ],
+        }
+    ]
+
+    # API call for completion
+    completion = client.chat.completions.create(
+        model="llama-3.2-90b-vision-preview",
+        messages=messages,
+        temperature=1,
+        max_tokens=1024,
+        top_p=1,
+        stream=False,
+        stop=None,
+    )
+
+    # Print the response
+    print(completion.choices[0].message.content)
+    return completion.choices[0].message.content
+
+
 # Function to generate plots based on the data
 def generate_plots(data):
     plots = []
@@ -180,7 +217,7 @@ def generate_plots(data):
         plot_path = f"public/static/{column}_histogram.png"
         plt.savefig(plot_path)
         plt.close()
-        plots.append(f"/static/{column}_histogram.png")
+        plots.append([f"/static/{column}_histogram.png",img_inference(plot_path)])
 
     # Generate a correlation heatmap if there are multiple numerical columns
     if len(numeric_data.columns) > 1:
@@ -191,7 +228,7 @@ def generate_plots(data):
         plot_path = "public/static/correlation_heatmap.png"
         plt.savefig(plot_path)
         plt.close()
-        plots.append(f"/static/correlation_heatmap.png")
+        plots.append([f"/static/correlation_heatmap.png",img_inference(plot_path)])
 
     return plots
 
