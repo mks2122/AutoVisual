@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">AutoVisual</title>
+  <desc id="desc">AutoVisual — drop in a CSV, get an AI-written analysis and charts explained by a vision model.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1020"/>
+      <stop offset="0.55" stop-color="#121a33"/>
+      <stop offset="1" stop-color="#1b1240"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="0.5" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#6366f1" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#5eead4"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#818cf8" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#818cf8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+    <clipPath id="frame"><rect width="1200" height="360" rx="20"/></clipPath>
+    <style>
+      .title { font: 800 76px 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif; letter-spacing: -2px; }
+      .tag   { font: 500 22px 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif; fill: #c7d2fe; }
+      .chip  { font: 600 13px 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif; fill: #e0e7ff; letter-spacing: 0.5px; }
+      .mono  { font: 500 13px 'Cascadia Code', 'Consolas', 'SFMono-Regular', monospace; fill: #94a3b8; }
+      .b { transform-box: fill-box; transform-origin: bottom; animation: grow 3.2s ease-in-out infinite alternate; }
+      .b2 { animation-delay: .4s } .b3 { animation-delay: .8s } .b4 { animation-delay: 1.2s }
+      .b5 { animation-delay: 1.6s } .b6 { animation-delay: 2s }
+      @keyframes grow { from { transform: scaleY(.55) } to { transform: scaleY(1) } }
+      .spark { animation: pulse 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+      @keyframes pulse { 0%,100% { opacity: .55; transform: scale(.9) } 50% { opacity: 1; transform: scale(1.1) } }
+      .line { stroke-dasharray: 520; stroke-dashoffset: 520; animation: draw 4s ease-out infinite; }
+      @keyframes draw { 0% { stroke-dashoffset: 520 } 60%,100% { stroke-dashoffset: 0 } }
+    </style>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1200" height="360" fill="url(#bg)"/>
+    <rect width="1200" height="360" fill="url(#grid)"/>
+    <circle cx="930" cy="170" r="260" fill="url(#glow)"/>
+    <rect y="356" width="1200" height="4" fill="url(#accent)"/>
+
+    <!-- Left: wordmark -->
+    <g transform="translate(72 0)">
+      <text class="mono" x="0" y="92">$ upload data.csv --purpose "Q3 report"</text>
+      <text class="title" x="0" y="178" fill="#f8fafc">Auto<tspan fill="url(#accent)">Visual</tspan></text>
+      <text class="tag" x="2" y="222">Drop in a dataset. Get the analysis, the charts,</text>
+      <text class="tag" x="2" y="252">and an AI explanation of every chart.</text>
+
+      <g transform="translate(2 286)">
+        <rect width="104" height="30" rx="15" fill="#ffffff" fill-opacity="0.07" stroke="#818cf8" stroke-opacity="0.5"/>
+        <text class="chip" x="52" y="20" text-anchor="middle">CSV → INSIGHT</text>
+        <rect x="116" width="118" height="30" rx="15" fill="#ffffff" fill-opacity="0.07" stroke="#5eead4" stroke-opacity="0.5"/>
+        <text class="chip" x="175" y="20" text-anchor="middle">LLM ANALYSIS</text>
+        <rect x="246" width="122" height="30" rx="15" fill="#ffffff" fill-opacity="0.07" stroke="#f472b6" stroke-opacity="0.5"/>
+        <text class="chip" x="307" y="20" text-anchor="middle">VISION READS</text>
+      </g>
+    </g>
+
+    <!-- Right: dashboard card -->
+    <g transform="translate(760 62)">
+      <rect width="368" height="236" rx="16" fill="#0f172a" fill-opacity="0.85" stroke="#ffffff" stroke-opacity="0.1"/>
+      <circle cx="22" cy="22" r="5" fill="#f87171"/>
+      <circle cx="40" cy="22" r="5" fill="#fbbf24"/>
+      <circle cx="58" cy="22" r="5" fill="#34d399"/>
+      <rect x="248" y="14" width="100" height="16" rx="8" fill="#818cf8" fill-opacity="0.18"/>
+      <text class="mono" x="298" y="26" text-anchor="middle" style="font-size:10px;fill:#c7d2fe">AI INSIGHTS</text>
+
+      <!-- axes -->
+      <path d="M28 200H340M28 200V52" stroke="#334155" stroke-width="1.5" fill="none"/>
+      <!-- bars -->
+      <g fill="url(#bar)">
+        <rect class="b"    x="48"  y="130" width="30" height="70" rx="5"/>
+        <rect class="b b2" x="96"  y="96"  width="30" height="104" rx="5"/>
+        <rect class="b b3" x="144" y="70"  width="30" height="130" rx="5"/>
+        <rect class="b b4" x="192" y="108" width="30" height="92" rx="5"/>
+        <rect class="b b5" x="240" y="142" width="30" height="58" rx="5"/>
+        <rect class="b b6" x="288" y="164" width="30" height="36" rx="5"/>
+      </g>
+      <!-- density curve -->
+      <path class="line" d="M40 186 C 80 150, 110 80, 160 66 S 240 120, 280 160 S 320 190, 336 192"
+            fill="none" stroke="#f472b6" stroke-width="3" stroke-linecap="round"/>
+      <text class="mono" x="28" y="224" style="font-size:11px">distribution · correlation · trends</text>
+    </g>
+
+    <!-- sparkle -->
+    <g class="spark" transform="translate(1128 56)">
+      <path d="M0 -18 L5 -5 L18 0 L5 5 L0 18 L-5 5 L-18 0 L-5 -5 Z" fill="#fde68a"/>
+    </g>
+    <g class="spark" style="animation-delay:1.1s" transform="translate(742 300)">
+      <path d="M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3 Z" fill="#a5b4fc"/>
+    </g>
+  </g>
+</svg>
